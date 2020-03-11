@@ -1,0 +1,8 @@
+Thank you for purchasing DarkRP Buyable Shipments.
+
+/* Installing */
+Replace 'spawned_shipment' located in darkrp/entites/entities with the one located in this zip. Then restart your server.
+
+/* How it works /*
+Watch the video it's very simple.
+http://www.youtube.com/watch?v=17mJSI1uwgc

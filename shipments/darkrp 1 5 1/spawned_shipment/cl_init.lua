@@ -1,0 +1,166 @@
+include("shared.lua")
+
+local matBallGlow = Material("models/props_combine/tpballglow")
+function ENT:Draw()
+	self.height = self.height or 0
+	self.colr = self.colr or 1
+	self.colg = self.colg or 0
+	self.StartTime = self.StartTime or CurTime()
+	
+	if GAMEMODE.Config.shipmentspawntime > 0 and self.height < self:OBBMaxs().z then
+		self:drawSpawning()
+	else
+		self:DrawModel()
+	end
+	
+	self:drawFloatingGun()
+	self:drawInfo()
+end
+
+function ENT:drawSpawning()
+	render.MaterialOverride(matBallGlow)
+	
+	render.SetColorModulation(self.colr, self.colg, 0)
+	
+	self:DrawModel()
+	
+	render.MaterialOverride()
+	self.colr = 1 - ((CurTime() - self.StartTime) / GAMEMODE.Config.shipmentspawntime)
+	self.colg = (CurTime() - self.StartTime) / GAMEMODE.Config.shipmentspawntime
+	
+	render.SetColorModulation(1, 1, 1)
+	
+	render.MaterialOverride()
+	
+	local normal = - self:GetAngles():Up()
+	local pos = self:LocalToWorld(Vector(0, 0, self:OBBMins().z + self.height))
+	local distance = normal:Dot(pos)
+	self.height = self:OBBMaxs().z * ((CurTime() - self.StartTime) / GAMEMODE.Config.shipmentspawntime)
+	render.EnableClipping(true)
+	render.PushCustomClipPlane(normal, distance);
+	
+	self:DrawModel()
+	
+	render.PopCustomClipPlane()
+end
+
+function ENT:drawFloatingGun()
+	local contents = CustomShipments[self:Getcontents() or ""]
+	if not contents or not IsValid(self:GetgunModel()) then return end
+	self:GetgunModel():SetNoDraw(true)
+	
+	local pos = self:GetPos()
+	local ang = self:GetAngles()
+	
+	local gunPos = self:GetAngles():Up() * 40 + ang:Up() * (math.sin(CurTime() * 3) * 8)
+	self:GetgunModel():SetPos(pos + gunPos)
+	
+	ang:RotateAroundAxis(ang:Up(), (CurTime() * 180) % 360)
+	self:GetgunModel():SetAngles(ang)
+	
+	if self:Getgunspawn() < CurTime() - 2 then
+		self:GetgunModel():DrawModel()
+		return
+	elseif self:Getgunspawn() < CurTime() then
+		return
+	end
+	
+	local delta = self:Getgunspawn() - CurTime()
+	local min, max = self:GetgunModel():OBBMins(), self:GetgunModel():OBBMaxs()
+	min, max = self:GetgunModel():LocalToWorld(min), self:GetgunModel():LocalToWorld(max)
+	
+	render.MaterialOverride(matBallGlow)
+	render.SetColorModulation(1 - delta, delta, 0)
+	self:GetgunModel():DrawModel()
+	render.MaterialOverride()
+	render.SetColorModulation(1, 1, 1)
+	
+	render.EnableClipping(true)
+	
+	local normal = -self:GetgunModel():GetAngles():Forward()
+	local cutPosition = LerpVector(delta, max, min)
+	local cutDistance = normal:Dot(cutPosition)
+	
+	render.PushCustomClipPlane(normal, cutDistance);
+	
+	self:GetgunModel():DrawModel()
+	
+	render.PopCustomClipPlane()
+	
+	render.EnableClipping(false)
+end
+
+function ENT:drawInfo()
+	local Pos = self:GetPos()
+	local Ang = self:GetAngles()
+
+	local content = self:Getcontents() or ""
+	local contents = CustomShipments[content]
+	if not contents then print("contents nil") return end
+	contents = contents.name
+
+	surface.SetFont("HUDNumber5")
+	local text = DarkRP.getPhrase("contents")
+	local TextWidth = surface.GetTextSize(text)
+	local TextWidth2 = surface.GetTextSize(contents)
+	local TextWidth3 = surface.GetTextSize("For Sale")
+
+	cam.Start3D2D(Pos + Ang:Up() * 25, Ang, 0.2)
+		draw.WordBox(2, -TextWidth*0.5 + 5, -40, text, "HUDNumber5", Color(140, 0, 0, 100), Color(255,255,255,255))
+		draw.WordBox(2, -TextWidth2*0.5 + 5, 10, contents, "HUDNumber5", Color(140, 0, 0, 100), Color(255,255,255,255))
+		
+		if self:Getbuyable() and IsValid(self:Getowning_ent()) then
+			draw.WordBox(2, -TextWidth3*0.5 + 5, 50, "For Sale", "HUDNumber5", Color(0, 180, 0, 100), Color(255,255,255,255))
+		end
+	cam.End3D2D()
+
+	Ang:RotateAroundAxis(Ang:Forward(), 90)
+
+	text = DarkRP.getPhrase("amount")
+	TextWidth = surface.GetTextSize(text)
+	TextWidth2 = surface.GetTextSize(self:Getcount())
+
+	cam.Start3D2D(Pos + Ang:Up() * 17, Ang, 0.14)
+		draw.WordBox(2, -TextWidth*0.5 + 5, -150, text, "HUDNumber5", Color(140, 0, 0, 100), Color(255,255,255,255))
+		draw.WordBox(2, -TextWidth2*0.5 + 0, -116, self:Getcount(), "HUDNumber5", Color(140, 0, 0, 100), Color(255,255,255,255))
+	cam.End3D2D()
+
+	if self:Getbuyable() and IsValid(self:Getowning_ent()) then
+		contents = CustomShipments[content]
+		
+		local price = (contents.price / contents.amount)
+		
+		if self:Getbuyprice() >= 1 then
+			price = self:Getbuyprice()
+		end
+		
+		if contents then
+			text = "Cost: " .. GAMEMODE.Config.currency .. price
+			TextWidth = surface.GetTextSize(text)
+			
+			cam.Start3D2D(Pos + Ang:Up() * 17, Ang, 0.14)
+				draw.WordBox(2, -TextWidth*0.5 + 5, -78, text, "HUDNumber5", Color(140, 0, 0, 100), Color(255,255,255,255))
+			cam.End3D2D()
+		end
+	end
+end
+
+/*---------------------------------------------------------------------------
+Create a shipment from a spawned_weapon
+---------------------------------------------------------------------------*/
+properties.Add("splitShipment",
+{
+	MenuLabel	=	"Split this shipment",
+	Order		=	2003,
+	MenuIcon	=	"icon16/arrow_divide.png",
+
+	Filter		=	function(self, ent, ply)
+						if not IsValid(ent) then return false end
+						return ent:GetClass() == "spawned_shipment"
+					end,
+
+	Action		=	function(self, ent)
+						if not IsValid(ent) then return end
+						RunConsoleCommand("darkrp", "splitshipment", ent:EntIndex())
+					end
+})

@@ -1,0 +1,12 @@
+Thank you for purchasing TTT Grenade Launcher.
+
+/* Installing */
+Drop entities & weapons folder inside of garrysmod/gamemodes/terrortown/entities/
+Drop VGUI folder inside of garrysmod/materials/
+
+/* Reporting Bugs */
+Submit a ticket.
+
+/* How it works /*
+Left click to fire one grenade.
+Right click to fire all grenade ammo.

@@ -1,0 +1,22 @@
+Thank you for purchasing Jet Pack.
+
+/* Installing */
+Drop the 'jetpack' folder into your garrysmod/addons folder.
+Drop the 'VGUI' folder into your garrysmod/materials/ folder.
+Now restart your server.
+If your TTT folder or DarkRP folder aren't named 'terrortown' or 'darkrp' then this will not currently work.
+
+/* How it works /*
+USE key for directional 'move'
+SPACE key for upwards 'hover'
+
+/* Known Issue(s) */
+Because of the limitation within garrys mod, the sound position of the jet pack isn't updated.
+I have submitting a request to the official git hub for such a function to be added.
+https://github.com/Facepunch/garrysmod-requests/issues/170
+
+/* Reporting Bugs /*
+Open a ticket here, http://coderhire.com/tickets/add/971
+
+/* Suggestion /*
+Open a ticket here, http://coderhire.com/tickets/add/971

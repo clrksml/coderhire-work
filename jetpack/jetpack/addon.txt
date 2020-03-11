@@ -1,0 +1,8 @@
+"AddonInfo"
+{
+	"name"				"Jet Pack"
+	"version"			"1.0"
+	"up_date"			"3/14/2014"
+	"author_name"		"Clark (Aide)"
+	"override"			"0"
+}

@@ -1,0 +1,13 @@
+Thank you for purchasing DarkRP Radio.
+
+/* Installing */
+Drop radio folder into gamemodes/darkrp/entities/entities
+
+/* How it works /*
+Uses Awesomium/Bass module to play music via urls. 
+
+/* What url exntensions does it accept */
+It accepts the following url extensions .pls and .mp3. It also accepts shoutcasts urls.
+
+/* Reporting Bugs /*
+Open a ticket here. http://coderhire.com/tickets/add/734
